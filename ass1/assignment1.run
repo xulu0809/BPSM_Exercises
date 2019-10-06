@@ -1,0 +1,4 @@
+#!/bin/bash
+mkdir ./fastqc_out 
+fastqc -o ./fastqc_out /localdisk/data/BPSM/Assignment1/fastq/*.gz
+
