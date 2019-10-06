@@ -4,8 +4,21 @@
 #fastqc -o ./fastqc_out /localdisk/data/BPSM/Assignment1/fastq/*.gz
 
 # Build an index file of the genome
-inputfile=Tb927_genome.fasta.gz
-cp /localdisk/data/BPSM/Assignment1/Tbb_genome/${inputfile} .
-gunzip ${inputfile}
-bowtie2-build Tb927_genome.fasta genome_index
+#inputfile=Tb927_genome.fasta.gz
+#cp /localdisk/data/BPSM/Assignment1/Tbb_genome/${inputfile} .
+#gunzip ${inputfile}
+#bowtie2-build Tb927_genome.fasta genome_index
+
+# Use bowtie2 to align read pairs to genome
+# And convert the output to indexed "bam"format
+location=/localdisk/data/BPSM/Assignment1/fastq
+for num in 216 {218..222}
+do
+file_in_1="${location}/${num}_L8_1.fq.gz"
+file_in_2="${location}/${num}_L8_2.fq.gz"
+file_out="${num}_L8.bam"
+file_bams="${file_bams} ${file_out}"
+bowtie2 -p 8 -x genome_index -1 ${file_in_1} -2 ${file_in_2} | samtools sort -@ 8 > ${file_out}
+samtools index -@ 8 ${file_out}
+done
 
