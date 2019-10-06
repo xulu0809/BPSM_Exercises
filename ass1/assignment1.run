@@ -1,4 +1,11 @@
 #!/bin/bash
-mkdir ./fastqc_out 
-fastqc -o ./fastqc_out /localdisk/data/BPSM/Assignment1/fastq/*.gz
+# Make a new directory to store the output files of fastQC
+#mkdir ./fastqc_out 
+#fastqc -o ./fastqc_out /localdisk/data/BPSM/Assignment1/fastq/*.gz
+
+# Build an index file of the genome
+inputfile=Tb927_genome.fasta.gz
+cp /localdisk/data/BPSM/Assignment1/Tbb_genome/${inputfile} .
+gunzip ${inputfile}
+bowtie2-build Tb927_genome.fasta genome_index
 
