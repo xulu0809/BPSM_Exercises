@@ -1,29 +1,33 @@
 #!/bin/bash
 # Make a new directory to store the output files of fastQC
-#mkdir ./fastqc_out 
-#fastqc -o ./fastqc_out /localdisk/data/BPSM/Assignment1/fastq/*.gz
+mkdir ./fastqc_out 
+fastqc -q -o ./fastqc_out /localdisk/data/BPSM/Assignment1/fastq/*.gz
 
 # Build an index file of the genome
-#inputfile=Tb927_genome.fasta.gz
-#cp /localdisk/data/BPSM/Assignment1/Tbb_genome/${inputfile} .
-#gunzip ${inputfile}
-#bowtie2-build Tb927_genome.fasta genome_index
+inputfile=Tb927_genome.fasta.gz
+cp /localdisk/data/BPSM/Assignment1/Tbb_genome/${inputfile} .
+gunzip ${inputfile}
+bowtie2-build Tb927_genome.fasta genome_index
 
 # Use bowtie2 to align read pairs to genome
 # And convert the output to indexed "bam" format
-#location=/localdisk/data/BPSM/Assignment1/fastq
-#for num in 216 {218..222}
-#do
-#file_in_1="${location}/${num}_L8_1.fq.gz"
-#file_in_2="${location}/${num}_L8_2.fq.gz"
-#file_out="${num}_L8.bam"
-#file_bams="${file_bams} ${file_out}"
-#bowtie2 -p 8 -x genome_index -1 ${file_in_1} -2 ${file_in_2} | samtools sort -@ 8 > ${file_out}
-#samtools index -@ 8 ${file_out}
-#done
+awk '{print $1}' /localdisk/data/BPSM/Assignment1/fastq/fqfiles | sort -n > file_num
+location=/localdisk/data/BPSM/Assignment1/fastq
+while read num
+do
+file_in_1="${location}/${num}_L8_1.fq.gz"
+file_in_2="${location}/${num}_L8_2.fq.gz"
+file_out="${num}_L8.bam"
+file_bams="${file_bams} ${file_out}"
+bowtie2 -p 10 -x genome_index -1 ${file_in_1} -2 ${file_in_2} | samtools sort -@ 10 > ${file_out}
+samtools index -@ 10 ${file_out}
+done < file_num
+
 # generate counts data and store it in the file bed.out
-#bedtools multicov -bams ${file_bams} -bed /localdisk/data/BPSM/Assignment1/Tbbgenes.bed > bed.out
-# generate a text file gives the mean of the counts per gene for each group
+bedtools multicov -bams ${file_bams} -bed /localdisk/data/BPSM/Assignment1/Tbbgenes.bed > bed.out
+
+# generate a text file gives the mean of the counts per gene(except pseudogene)  for each group
 echo -e "Gene Name\tMean For Slender Samples\tMean For Stumpy Samples" >> genecounts.txt
-awk '{FS="\t";OFS="\t"; if($5 == "gene"){print $4,int(($7+$8+$9)/3),int(($10+$11+$12)/3)}}' bed.out >> genecounts.txt
+awk '{FS="\t";OFS="\t"; if($5 == "gene")
+{print $4,int(($7+$8+$9)/3),int(($10+$11+$12)/3)}}' bed.out >> genecounts.txt
 
