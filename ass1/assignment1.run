@@ -9,22 +9,25 @@ cp /localdisk/data/BPSM/Assignment1/Tbb_genome/${inputfile} .
 gunzip ${inputfile}
 bowtie2-build Tb927_genome.fasta genome_index
 
+# Create variables to represent filenames
+location=/localdisk/data/BPSM/Assignment1/fastq
+awk '{if($2 == "Slender"){print $1,$3,$4;}}' ${location}/fqfiles | sort -n > slender_stumpy
+awk '{if($2 == "Stumpy"){print $1,$3,$4;}}' ${location}/fqfiles | sort -n >> slender_stumpy
+while read num file_1 file_2
+do
+file_in_1="${location}/${file_1}"
+file_in_2="${location}/${file_2}"
+file_out="${num}_L8.bam"
+bam_files="${bam_files} ${file_out}"
+
 # Use bowtie2 to align read pairs to genome
 # And convert the output to indexed "bam" format
-awk '{print $1}' /localdisk/data/BPSM/Assignment1/fastq/fqfiles | sort -n > file_num
-location=/localdisk/data/BPSM/Assignment1/fastq
-while read num
-do
-file_in_1="${location}/${num}_L8_1.fq.gz"
-file_in_2="${location}/${num}_L8_2.fq.gz"
-file_out="${num}_L8.bam"
-file_bams="${file_bams} ${file_out}"
 bowtie2 -p 10 -x genome_index -1 ${file_in_1} -2 ${file_in_2} | samtools sort -@ 10 > ${file_out}
 samtools index -@ 10 ${file_out}
-done < file_num
+done < slender_stumpy
 
 # generate counts data and store it in the file bed.out
-bedtools multicov -bams ${file_bams} -bed /localdisk/data/BPSM/Assignment1/Tbbgenes.bed > bed.out
+bedtools multicov -bams ${bam_files} -bed /localdisk/data/BPSM/Assignment1/Tbbgenes.bed > bed.out
 
 # generate a text file gives the mean of the counts per gene(except pseudogene)  for each group
 echo -e "Gene Name\tMean For Slender Samples\tMean For Stumpy Samples" >> genecounts.txt
