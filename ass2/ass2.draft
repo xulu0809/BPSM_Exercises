@@ -1,0 +1,2 @@
+esearch -db protein -query "protein_name[PROT] AND organism[ORGN]" | efetch -db protein -format fasta > protein_name.organism.fa
+
