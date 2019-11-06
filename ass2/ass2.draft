@@ -1,2 +1,4 @@
-esearch -db protein -query "protein_name[PROT] AND organism[ORGN]" | efetch -db protein -format fasta > protein_name.organism.fa
+esearch -db protein -query "protein_name[PROT] AND organism[ORGN] NOT partial" NOT predicted | efetch -db protein -format fasta > protein_name.organism.fa
 
+#ensure not zero?
+esearch -db taxonomy -query "organism" 
