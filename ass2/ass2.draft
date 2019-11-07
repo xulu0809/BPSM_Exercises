@@ -2,3 +2,5 @@ esearch -db protein -query "protein_name[PROT] AND organism[ORGN] NOT partial" N
 
 #ensure not zero?
 esearch -db taxonomy -query "organism" 
+
+plotcon -winsize 4 -graph x11 clus_out.fa -goutfile plot.out
